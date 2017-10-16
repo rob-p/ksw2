@@ -15,7 +15,11 @@ public:
 };
 
 struct KSW2Config {
-  
+  int8_t gapo = -1;
+  int8_t gape = -1;
+  int bandwidth = 10;
+  int dropoff = -1;
+  int flag = 0;
 };
 
 class KSW2Aligner {

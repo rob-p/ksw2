@@ -70,7 +70,10 @@ static void global_aln(const char *algo, void *km, const char *qseq_, const char
 	} else if (strcmp(algo, "gg2") == 0) {
 		if (flag & KSW_EZ_SCORE_ONLY) ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, 0, 0, 0);
 		else ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-	}
+	}/* else if (strcmp(algo, "gg2_sse_aligner") == 0) {
+  if (KSW2Config.flag & KSW_EZ_SCORE_ONLY) ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, 0, 0, 0);
+  else ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  }*/
 	else if (strcmp(algo, "gg2_sse") == 0)     ez->score = ksw_gg2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
 	else if (strcmp(algo, "gg2_sse_aligner") == 0)     {aligner(qseq, qlen, tseq, tlen, ez);}//ksw_gg2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
 	else if (strcmp(algo, "extz") == 0)        ksw_extz(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, zdrop, flag, ez);
@@ -155,15 +158,18 @@ int main(int argc, char *argv[])
 	int8_t mat[25];
 	ksw_extz_t ez;
 	gzFile fp[2];
-  
+  KSW2Config config;
+  config.gapo = q;
+  config.gape = e;
+
 	while ((c = getopt(argc, argv, "t:w:R:rsgz:A:B:O:E:K")) >= 0) {
 		if (c == 't') algo = optarg;
 		else if (c == 'w') w = atoi(optarg);
 		else if (c == 'R') rep = atoi(optarg);
 		else if (c == 'z') zdrop = atoi(optarg);
-		else if (c == 'r') flag |= KSW_EZ_RIGHT;
-		else if (c == 's') flag |= KSW_EZ_SCORE_ONLY;
-		else if (c == 'g') flag |= KSW_EZ_APPROX_MAX | KSW_EZ_APPROX_DROP;
+		else if (c == 'r') {flag |= KSW_EZ_RIGHT; config.flag |= KSW_EZ_RIGHT; }
+    else if (c == 's') {flag |= KSW_EZ_SCORE_ONLY; config.flag |= KSW_EZ_SCORE_ONLY; }
+    else if (c == 'g') {flag |= KSW_EZ_APPROX_MAX | KSW_EZ_APPROX_DROP; config.flag |= KSW_EZ_APPROX_MAX | KSW_EZ_APPROX_DROP; }
 		else if (c == 'K') no_kalloc = 1;
 		else if (c == 'A') a = atoi(optarg);
 		else if (c == 'B') b = atoi(optarg);

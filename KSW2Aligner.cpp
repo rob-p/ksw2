@@ -114,7 +114,7 @@ void KSW2Aligner::operator()(const char* const queryOriginal, const int queryLen
 
 void KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
                              const uint8_t* const target_, const int targetLength,
-                             /*const KSW2Config& config,*/ksw_extz_t* ez) {
+                             /*const KSW2Config& config, */ ksw_extz_t* ez) {
   //auto ez = &result_;
   int i;
   auto qlen = queryLength;
@@ -122,6 +122,8 @@ void KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
   int q = 4;
   int e = 2;// q2 = 13, e2 = 1;
   int w = -1;
+  //ez->score = ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(),
+  //                        config.gapo, config.gape, config.bandwidth, config.dropoff, config.flag, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   ez->score = ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   //global_aln(algo, km, ks[1]->seq.s, ks[0]->seq.s, 5, mat, q, e, q2, e2, w, zdrop, flag, &ez);
 }
