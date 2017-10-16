@@ -4,6 +4,7 @@
 #include <zlib.h>
 #include "ksw2.h"
 #include "kseq.h"
+#include "KSW2Aligner.hpp"
 KSEQ_INIT(gzFile, gzread)
 
 #ifdef HAVE_GABA
@@ -48,7 +49,7 @@ static void ksw_gen_simple_mat(int m, int8_t *mat, int8_t a, int8_t b)
 }
 
 static void global_aln(const char *algo, void *km, const char *qseq_, const char *tseq_, int8_t m, const int8_t *mat, int8_t q, int8_t e, int8_t q2, int8_t e2,
-					   int w, int zdrop, int flag, ksw_extz_t *ez)
+                       int w, int zdrop, int flag, ksw_extz_t *ez, KSW2Aligner& aligner)
 {
 	int i, qlen, tlen;
 	uint8_t *qseq, *tseq;
@@ -71,6 +72,7 @@ static void global_aln(const char *algo, void *km, const char *qseq_, const char
 		else ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
 	}
 	else if (strcmp(algo, "gg2_sse") == 0)     ez->score = ksw_gg2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+	else if (strcmp(algo, "gg2_sse_aligner") == 0)     {aligner(qseq, qlen, tseq, tlen, ez);}//ksw_gg2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
 	else if (strcmp(algo, "extz") == 0)        ksw_extz(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, zdrop, flag, ez);
 	else if (strcmp(algo, "extz2_sse") == 0)   ksw_extz2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, zdrop, flag, ez);
 	else if (strcmp(algo, "extd") == 0)        ksw_extd(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, q2, e2, w, zdrop, flag, ez);
@@ -153,7 +155,7 @@ int main(int argc, char *argv[])
 	int8_t mat[25];
 	ksw_extz_t ez;
 	gzFile fp[2];
-
+  
 	while ((c = getopt(argc, argv, "t:w:R:rsgz:A:B:O:E:K")) >= 0) {
 		if (c == 't') algo = optarg;
 		else if (c == 'w') w = atoi(optarg);
@@ -196,8 +198,10 @@ int main(int argc, char *argv[])
 	fp[0] = gzopen(argv[optind], "r");
 	fp[1] = gzopen(argv[optind+1], "r");
 
+  KSW2Aligner aligner;
+
 	if (fp[0] == 0 && fp[1] == 0) {
-		global_aln(algo, km, argv[optind+1], argv[optind], 5, mat, q, e, q2, e2, w, zdrop, flag, &ez);
+		global_aln(algo, km, argv[optind+1], argv[optind], 5, mat, q, e, q2, e2, w, zdrop, flag, &ez, aligner);
 		print_aln("first", "second", &ez);
 	} else if (fp[0] && fp[1]) {
 		kseq_t *ks[2];
@@ -206,8 +210,8 @@ int main(int argc, char *argv[])
 		if (pair) {
 			while (kseq_read(ks[0]) > 0) {
 				if (kseq_read(ks[1]) <= 0) break;
-				for (i = 0; i < rep; ++i)
-					global_aln(algo, km, ks[1]->seq.s, ks[0]->seq.s, 5, mat, q, e, q2, e2, w, zdrop, flag, &ez);
+				for (i = 0; i < rep; ++i) 
+					global_aln(algo, km, ks[1]->seq.s, ks[0]->seq.s, 5, mat, q, e, q2, e2, w, zdrop, flag, &ez, aligner);
 				print_aln(ks[0]->name.s, ks[1]->name.s, &ez);
 			}
 		}

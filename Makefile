@@ -1,9 +1,11 @@
 CC=			gcc
+CPP= c++
 CFLAGS=		-g -Wall -Wextra -Wc++-compat -O2
+CXXFLAGS= -g -Wall -Wextra -Wc++-compat -O2 -std=c++11
 CPPFLAGS=	-DHAVE_KALLOC
 INCLUDES=	-I.
 OBJS=		ksw2_gg.o ksw2_gg2.o ksw2_gg2_sse.o ksw2_extz.o ksw2_extz2_sse.o \
-			ksw2_extd.o ksw2_extd2_sse.o ksw2_extf2_sse.o ksw2_exts2_sse.o
+			ksw2_extd.o ksw2_extd2_sse.o ksw2_extf2_sse.o ksw2_exts2_sse.o KSW2Aligner.o
 PROG=		ksw2-test
 LIBS=		-lz
 
@@ -30,14 +32,17 @@ endif
 
 .SUFFIXES:.c .o
 
+.cpp.o:
+		$(CPP) -c $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) $< -o $@
+
 .c.o:
 		$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCLUDES) $< -o $@
 
 all:$(PROG)
 
 ksw2-test:cli.o kalloc.o $(OBJS)
-		$(CC) $(CFLAGS) $^ -o $@ $(LIBS_MORE) $(LIBS)
-		
+		$(CPP) $(CFLAGS) $^ -o $@ $(LIBS_MORE) $(LIBS)
+
 clean:
 		rm -fr gmon.out *.o a.out $(PROG) $(PROG_EXTRA) *~ *.a *.dSYM session*
 
@@ -56,3 +61,4 @@ ksw2_extz2_sse.o: ksw2.h
 ksw2_gg.o: ksw2.h
 ksw2_gg2.o: ksw2.h
 ksw2_gg2_sse.o: ksw2.h
+KSW2Aligner.o: ksw2.h
