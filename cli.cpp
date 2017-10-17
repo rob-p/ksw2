@@ -163,17 +163,16 @@ int main(int argc, char *argv[])
 	int8_t mat[25];
 	ksw_extz_t ez;
 	gzFile fp[2];
-  KSW2Aligner aligner;
-  KSW2Config& config = aligner.config();
+  KSW2Config config;
   config.gapo = q;
   config.gape = e;
 
 
 	while ((c = getopt(argc, argv, "t:w:R:rsgz:A:B:O:E:K")) >= 0) {
 		if (c == 't') algo = optarg;
-		else if (c == 'w') w = atoi(optarg);
+		else if (c == 'w') {w = atoi(optarg); config.bandwidth = w;}
 		else if (c == 'R') rep = atoi(optarg);
-		else if (c == 'z') zdrop = atoi(optarg);
+		else if (c == 'z') {zdrop = atoi(optarg); config.dropoff = zdrop;}
 		else if (c == 'r') {flag |= KSW_EZ_RIGHT; config.flag |= KSW_EZ_RIGHT; }
     else if (c == 's') {flag |= KSW_EZ_SCORE_ONLY; config.flag |= KSW_EZ_SCORE_ONLY; }
     else if (c == 'g') {flag |= KSW_EZ_APPROX_MAX | KSW_EZ_APPROX_DROP; config.flag |= KSW_EZ_APPROX_MAX | KSW_EZ_APPROX_DROP; }
@@ -207,6 +206,11 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "  -E INT[,INT]  gap extension penalty [%d,%d]\n", e, e2);
 		return 1;
 	}
+
+
+  KSW2Aligner aligner(a, b);
+  aligner.config() = config;
+
 #ifdef HAVE_KALLOC
 	km = no_kalloc? 0 : km_init();
 #endif

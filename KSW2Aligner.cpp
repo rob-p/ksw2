@@ -21,12 +21,12 @@ unsigned char seq_nt4_table_loc[256] = {
   4, 4, 4, 4,  4, 4, 4, 4,  4, 4, 4, 4,  4, 4, 4, 4
 };
 
-KSW2Aligner::KSW2Aligner() {
+KSW2Aligner::KSW2Aligner(int match, int mismatch) {
   query_.clear();
   target_.clear();
   kalloc_allocator_.reset(km_init());
-  int a = 2;
-  int b = 4;
+  int a = match;
+  int b = mismatch;
   int m = 5;
   int i, j;
   // use the ``simple'' scoring matrix for now.

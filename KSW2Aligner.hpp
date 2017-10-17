@@ -35,7 +35,7 @@ struct KSW2Config {
 class KSW2Aligner {
 
   public:
-    KSW2Aligner();
+  KSW2Aligner(int match = 2, int mismatch = -4);
 
   int operator()(const char* const queryOriginal, const int queryLength,
                     const char* const targetOriginal, const int targetLength,
