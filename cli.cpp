@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <zlib.h>
+#include <string>
 #include "ksw2.h"
 #include "kseq.h"
 #include "KSW2Aligner.hpp"
@@ -14,6 +15,11 @@ KSEQ_INIT(gzFile, gzread)
 #ifdef HAVE_PARASAIL
 #include "parasail.h"
 #endif
+
+using ksw2pp::KSW2Aligner;
+using ksw2pp::KSW2Config;
+using ksw2pp::EnumToType;
+using ksw2pp::KSW2AlignmentType;
 
 unsigned char seq_nt4_table[256] = {
 	0, 1, 2, 3,  4, 4, 4, 4,  4, 4, 4, 4,  4, 4, 4, 4, 
@@ -51,7 +57,6 @@ static void ksw_gen_simple_mat(int m, int8_t *mat, int8_t a, int8_t b)
 static void global_aln(const char *algo, void *km, const char *qseq_, const char *tseq_, int8_t m, const int8_t *mat, int8_t q, int8_t e, int8_t q2, int8_t e2,
                        int w, int zdrop, int flag, ksw_extz_t *ez, KSW2Aligner& aligner)
 {
-  auto& config = aligner.config();
 	int i, qlen, tlen;
 	uint8_t *qseq, *tseq;
 	ez->max = 0, ez->mqe = ez->mte = KSW_NEG_INF;
@@ -154,7 +159,7 @@ int main(int argc, char *argv[])
 	void *km = 0;
 	int8_t a = 2, b = 4, q = 4, e = 2, q2 = 13, e2 = 1;
 	int c, i, pair = 1, w = -1, flag = 0, rep = 1, zdrop = -1, no_kalloc = 0;
-	char *algo = "extd", *s;
+	char *algo = nullptr, *s;
 	int8_t mat[25];
 	ksw_extz_t ez;
 	gzFile fp[2];
@@ -183,6 +188,10 @@ int main(int argc, char *argv[])
 			if (*s == ',') e2 = strtol(s+1, &s, 10);
 		}
 	}
+  if (algo == nullptr) {
+    std::string algos = "extd";
+    strcpy(algo, algos.c_str());
+  }
 	if (argc - optind < 2) {
 		fprintf(stderr, "Usage: ksw2-test [options] <DNA-target> <DNA-query>\n");
 		fprintf(stderr, "Options:\n");

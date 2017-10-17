@@ -7,6 +7,7 @@
 #include "ksw2.h"
 #include "kalloc.h"
 
+namespace ksw2pp {
 class KallocDeleter {
 public:
   void operator()(void* p) {
@@ -70,5 +71,5 @@ private:
   std::vector<int8_t> mat_;
   KSW2Config config_;
 };
-
+}
 #endif //__KSW2_ALIGNER_HPP__
