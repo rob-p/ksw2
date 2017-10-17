@@ -28,6 +28,7 @@ KSW2Aligner::KSW2Aligner() {
   int b = 4;
   int m = 5;
   int i, j;
+  // use the ``simple'' scoring matrix for now.
   mat_.resize(m*m);
 
   a = a < 0? -a : a;
@@ -95,37 +96,38 @@ static int transformSequencesDNA(const char* const queryOriginal, const int quer
 }
 
 
-void KSW2Aligner::operator()(const char* const queryOriginal, const int queryLength,
+int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLength,
                   const char* const targetOriginal, const int targetLength,
-                             /*const KSW2Config& config,*/ksw_extz_t* ez) {
+                  ksw_extz_t* ez) {
   //auto ez = &result_;
-  int i;
   auto qlen = queryLength;
   auto tlen = targetLength;
   int asize = transformSequencesDNA(queryOriginal, queryLength,
                                     targetOriginal, targetLength,
                                     query_, target_);
-  int q = 4;
-  int e = 2;// q2 = 13, e2 = 1;
-  int w = -1;
-  ez->score = ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-  //global_aln(algo, km, ks[1]->seq.s, ks[0]->seq.s, 5, mat, q, e, q2, e2, w, zdrop, flag, &ez);
+  (void)asize;
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+    ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
+    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  return ez->score;
 }
 
-void KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
+int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
                              const uint8_t* const target_, const int targetLength,
-                             /*const KSW2Config& config, */ ksw_extz_t* ez) {
+                             ksw_extz_t* ez) {
   //auto ez = &result_;
-  int i;
   auto qlen = queryLength;
   auto tlen = targetLength;
-  int q = 4;
-  int e = 2;// q2 = 13, e2 = 1;
-  int w = -1;
-  //ez->score = ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(),
-  //                        config.gapo, config.gape, config.bandwidth, config.dropoff, config.flag, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-  ez->score = ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-  //global_aln(algo, km, ks[1]->seq.s, ks[0]->seq.s, 5, mat, q, e, q2, e2, w, zdrop, flag, &ez);
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+    ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, 0, 0, 0) :
+    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  return ez->score;
 }
 
 //private:
