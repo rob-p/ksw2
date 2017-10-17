@@ -51,6 +51,7 @@ static void ksw_gen_simple_mat(int m, int8_t *mat, int8_t a, int8_t b)
 static void global_aln(const char *algo, void *km, const char *qseq_, const char *tseq_, int8_t m, const int8_t *mat, int8_t q, int8_t e, int8_t q2, int8_t e2,
                        int w, int zdrop, int flag, ksw_extz_t *ez, KSW2Aligner& aligner)
 {
+  auto& config = aligner.config();
 	int i, qlen, tlen;
 	uint8_t *qseq, *tseq;
 	ez->max = 0, ez->mqe = ez->mte = KSW_NEG_INF;
@@ -70,12 +71,13 @@ static void global_aln(const char *algo, void *km, const char *qseq_, const char
 		if (flag & KSW_EZ_SCORE_ONLY) ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, 0, 0, 0);
 		else ez->score = ksw_gg2(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
 	} else if (strcmp(algo, "gg2_sse_aligner") == 0) {
-    ez->score = aligner(qseq, qlen, tseq, tlen, ez);
+    ez->score = aligner(qseq, qlen, tseq, tlen, ez, EnumToType<KSW2AlignmentType::GLOBAL>());
   } else if (strcmp(algo, "gg2_sse") == 0)     {
     ez->score = ksw_gg2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   }
 	else if (strcmp(algo, "extz") == 0)        ksw_extz(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, zdrop, flag, ez);
 	else if (strcmp(algo, "extz2_sse") == 0)   ksw_extz2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, w, zdrop, flag, ez);
+  else if (strcmp(algo, "extz2_sse_aligner") == 0) aligner(qseq, qlen, tseq, tlen, ez, EnumToType<KSW2AlignmentType::EXTENSION>());
 	else if (strcmp(algo, "extd") == 0)        ksw_extd(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, q2, e2, w, zdrop, flag, ez);
 	else if (strcmp(algo, "extd2_sse") == 0)   ksw_extd2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, m, mat, q, e, q2, e2, w, zdrop, flag, ez);
 	else if (strcmp(algo, "extf2_sse") == 0)   ksw_extf2_sse(km, qlen, (uint8_t*)qseq, tlen, (uint8_t*)tseq, mat[0], mat[1], e, w, zdrop, ez);
@@ -161,6 +163,7 @@ int main(int argc, char *argv[])
   config.gapo = q;
   config.gape = e;
 
+
 	while ((c = getopt(argc, argv, "t:w:R:rsgz:A:B:O:E:K")) >= 0) {
 		if (c == 't') algo = optarg;
 		else if (c == 'w') w = atoi(optarg);
@@ -224,7 +227,7 @@ int main(int argc, char *argv[])
 		gzclose(fp[0]);
 		gzclose(fp[1]);
 	}
-	if (strcmp(algo, "gg2_sse_aligner") != 0) {
+	if (strcmp(algo, "gg2_sse_aligner") != 0 and strcmp(algo, "extz2_sse_aligner") != 0) {
     kfree(km, ez.cigar);
   } else {
     aligner.freeCIGAR(&ez);

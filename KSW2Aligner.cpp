@@ -40,6 +40,7 @@ KSW2Aligner::KSW2Aligner() {
   }
   for (j = 0; j < m; ++j)
     mat_[(m - 1) * m + j] = 0;
+
 }
 
 /**
@@ -94,11 +95,17 @@ static int transformSequencesDNA(const char* const queryOriginal, const int quer
   }
   return 4;
 }
+/*
+template<KSW2AlignmentType AlnT>
+int doAlign(const char* const queryOriginal, const int queryLength,
+            const char* const targetOriginal, const int targetLength,
+            void* kalloc, KSW2Config& config_, std::vector<int8_t>& mat_, ksw_extz_t* ez) { return 0; }
 
 
-int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLength,
-                  const char* const targetOriginal, const int targetLength,
-                  ksw_extz_t* ez) {
+template<>
+int doAlign<KSW2AlignmentType::GLOBAL>(const char* const queryOriginal, const int queryLength,
+            const char* const targetOriginal, const int targetLength,
+                                       void* kalloc, KSW2Config& config_, std::vector<int8_t>& mat_, ksw_extz_t* ez) {
   //auto ez = &result_;
   auto qlen = queryLength;
   auto tlen = targetLength;
@@ -110,41 +117,104 @@ int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLeng
   int e = config_.gape;
   int w = config_.bandwidth;
   int z = config_.dropoff;
-  if (config_.atype == KSW2AlignmentType::EXTENSION) {
-    ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, z, config_.flag, ez);
-  } else {
-    ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
-      ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
-      ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-  }
+  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+   ksw_gg2(kalloc, qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
+   ksw_gg2_sse(kalloc, qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   return ez->score;
 }
 
-int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
-                             const uint8_t* const target_, const int targetLength,
-                             ksw_extz_t* ez) {
+template<>
+int doAlign<KSW2AlignmentType::EXTENSION>(const char* const queryOriginal, const int queryLength,
+                                       const char* const targetOriginal, const int targetLength,
+                                          void* kalloc, KSW2Config& config_, std::vector<int8_t>& mat_, ksw_extz_t* ez) {
   //auto ez = &result_;
+  auto qlen = queryLength;
+  auto tlen = targetLength;
+  int asize = transformSequencesDNA(queryOriginal, queryLength,
+                                    targetOriginal, targetLength,
+                                    query_, target_);
+  (void)asize;
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  int z = config_.dropoff;
+  ksw_extz2_sse(kalloc, qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, z, config_.flag, ez);
+  return ez->score;
+}
+
+
+
+template <KSW2AlignmentType AlnT>
+int KSW2Aligner<AlnT>::operator()(const char* const queryOriginal, const int queryLength,
+                            const char* const targetOriginal, const int targetLength,
+                            ksw_extz_t* ez) {
+  return doAlign<AlnT>(queryOriginal, queryLength, targetOriginal, targetLength, kalloc_allocator_.get(), config_, mat_, ez);
+}
+*/
+
+int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLength,
+                            const char* const targetOriginal, const int targetLength,
+                            ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>) {
+  //auto ez = &result_;
+  auto qlen = queryLength;
+  auto tlen = targetLength;
+  int asize = transformSequencesDNA(queryOriginal, queryLength,
+                                    targetOriginal, targetLength,
+                                    query_, target_);
+  (void)asize;
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  int z = config_.dropoff;
+  ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, z, config_.flag, ez);
+  return ez->score;
+}
+
+int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLength,
+                            const char* const targetOriginal, const int targetLength,
+                            ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>) {
+  //auto ez = &result_;
+  auto qlen = queryLength;
+  auto tlen = targetLength;
+  int asize = transformSequencesDNA(queryOriginal, queryLength,
+                                    targetOriginal, targetLength,
+                                    query_, target_);
+  (void)asize;
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  int z = config_.dropoff;
+  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+    ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
+    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  return ez->score;
+}
+
+
+int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
+                            const uint8_t* const target_, const int targetLength,
+                            ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>) {
   auto qlen = queryLength;
   auto tlen = targetLength;
   int q = config_.gapo;
   int e = config_.gape;
   int w = config_.bandwidth;
   int z = config_.dropoff;
-  if (config_.atype == KSW2AlignmentType::EXTENSION) {
-    ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, z, config_.flag, ez);
-  } else {
-    ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
-      ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, 0, 0, 0) :
-      ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
-  }
+  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+    ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, 0, 0, 0) :
+    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   return ez->score;
 }
 
-//private:
-//  std::vector<unsigned char> query_;
-//  std::vector<unsigned char> target_;
-//  ksw_extz_t result_;
-//  std::unique_ptr<void*> kalloc_allocator_{nullptr};
-//  //std::vector<Block> blocks_;
-//  //PeqTable peq_;
-
+int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
+                            const uint8_t* const target_, const int targetLength,
+                            ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>) {
+  auto qlen = queryLength;
+  auto tlen = targetLength;
+  int q = config_.gapo;
+  int e = config_.gape;
+  int w = config_.bandwidth;
+  int z = config_.dropoff;
+  ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, z, config_.flag, ez);
+  return ez->score;
+}

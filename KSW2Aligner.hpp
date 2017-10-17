@@ -16,6 +16,12 @@ public:
 
 enum class KSW2AlignmentType : uint8_t { GLOBAL = 1, EXTENSION = 2 };
 
+template <KSW2AlignmentType I>
+struct EnumToType
+{
+  enum { value = static_cast<uint8_t>(I) };
+};
+
 struct KSW2Config {
   int8_t gapo = -1;
   int8_t gape = -1;
@@ -29,12 +35,24 @@ class KSW2Aligner {
 
   public:
     KSW2Aligner();
-    int operator()(const char* const queryOriginal, const int queryLength,
+
+  int operator()(const char* const queryOriginal, const int queryLength,
                     const char* const targetOriginal, const int targetLength,
-                    /*const KSW2Config& config,*/ksw_extz_t* ez);
+                 ksw_extz_t* ez,  EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength,
+                 ksw_extz_t* ez,  EnumToType<KSW2AlignmentType::EXTENSION>);
+
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                   const uint8_t* const targetOriginal, const int targetLength,
-                  /*const KSW2Config& config,*/ksw_extz_t* ez);
+                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
+
+
   KSW2Config& config() { return config_; }
   const ksw_extz_t& result() { return result_; }
   void freeCIGAR(ksw_extz_t* ez) {
@@ -44,15 +62,13 @@ class KSW2Aligner {
   }
   //const ksw_extz_t& result() { return result_; }
 
-  private:
-    std::vector<uint8_t> query_;
-    std::vector<uint8_t> target_;
-    ksw_extz_t result_;
+private:
+  std::vector<uint8_t> query_;
+  std::vector<uint8_t> target_;
+  ksw_extz_t result_;
   std::unique_ptr<void, KallocDeleter> kalloc_allocator_{nullptr, KallocDeleter()};
   std::vector<int8_t> mat_;
   KSW2Config config_;
-  //std::vector<Block> blocks_;
-  //PeqTable peq_;
 };
 
 #endif //__KSW2_ALIGNER_HPP__
