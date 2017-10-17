@@ -109,9 +109,14 @@ int KSW2Aligner::operator()(const char* const queryOriginal, const int queryLeng
   int q = config_.gapo;
   int e = config_.gape;
   int w = config_.bandwidth;
-  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
-    ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
-    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  int z = config_.dropoff;
+  if (config_.atype == KSW2AlignmentType::EXTENSION) {
+    ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, z, config_.flag, ez);
+  } else {
+    ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+      ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0) :
+      ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen, target_.data(), 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  }
   return ez->score;
 }
 
@@ -124,9 +129,14 @@ int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
   int q = config_.gapo;
   int e = config_.gape;
   int w = config_.bandwidth;
-  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
-    ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, 0, 0, 0) :
-    ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  int z = config_.dropoff;
+  if (config_.atype == KSW2AlignmentType::EXTENSION) {
+    ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, z, config_.flag, ez);
+  } else {
+    ez->score = (config_.flag & KSW_EZ_SCORE_ONLY) ?
+      ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, 0, 0, 0) :
+      ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5, mat_.data(), q, e, w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  }
   return ez->score;
 }
 

@@ -14,12 +14,15 @@ public:
   }
 };
 
+enum class KSW2AlignmentType : uint8_t { GLOBAL = 1, EXTENSION = 2 };
+
 struct KSW2Config {
   int8_t gapo = -1;
   int8_t gape = -1;
   int bandwidth = -1;
   int dropoff = -1;
   int flag = 0;
+  KSW2AlignmentType atype = KSW2AlignmentType::GLOBAL;
 };
 
 class KSW2Aligner {
