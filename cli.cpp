@@ -189,6 +189,7 @@ int main(int argc, char *argv[])
 	}
   if (algo == nullptr) {
     std::string algos = "extd";
+    algo = new char[algos.length()+1];
     strcpy(algo, algos.c_str());
   }
 	if (argc - optind < 2) {
@@ -248,5 +249,6 @@ int main(int argc, char *argv[])
 #ifdef HAVE_KALLOC
 	km_destroy(km);
 #endif
+  delete [] algo;
 	return 0;
 }
