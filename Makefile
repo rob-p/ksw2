@@ -1,4 +1,4 @@
-CC=			gcc
+CC= gcc
 CPP= c++
 CFLAGS=		-g -Wall -Wextra -Wc++-compat -O2
 CXXFLAGS= -g -Wall -Wextra -Wc++-compat -O2 -std=c++11
@@ -61,4 +61,4 @@ ksw2_extz2_sse.o: ksw2.h
 ksw2_gg.o: ksw2.h
 ksw2_gg2.o: ksw2.h
 ksw2_gg2_sse.o: ksw2.h
-KSW2Aligner.o: ksw2.h
+KSW2Aligner.o: ksw2.h KSW2Aligner.hpp
