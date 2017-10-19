@@ -3,7 +3,8 @@ CPP= c++
 CFLAGS=		-g -Wall -Wextra -Wc++-compat -O2
 CXXFLAGS= -g -Wall -Wextra -Wc++-compat -O2 -std=c++11
 CPPFLAGS=	-DHAVE_KALLOC
-INCLUDES=	-I.
+INCLUDE_DIR= ../include
+INCLUDES=	-I../include
 OBJS=		ksw2_gg.o ksw2_gg2.o ksw2_gg2_sse.o ksw2_extz.o ksw2_extz2_sse.o \
 			ksw2_extd.o ksw2_extd2_sse.o ksw2_extf2_sse.o ksw2_exts2_sse.o KSW2Aligner.o
 PROG=		ksw2-test
@@ -51,14 +52,14 @@ depend:
 
 # DO NOT DELETE
 
-cli.o: ksw2.h kseq.h
-kalloc.o: kalloc.h
-ksw2_extd.o: ksw2.h
-ksw2_extd2_sse.o: ksw2.h
-ksw2_extf2_sse.o: ksw2.h
-ksw2_extz.o: ksw2.h
-ksw2_extz2_sse.o: ksw2.h
-ksw2_gg.o: ksw2.h
-ksw2_gg2.o: ksw2.h
-ksw2_gg2_sse.o: ksw2.h
-KSW2Aligner.o: ksw2.h KSW2Aligner.hpp
+cli.o: $(INCLUDE_DIR)/ksw2.h $(INCLUDE_DIR)/kseq.h
+kalloc.o: $(INCLUDE_DIR)/kalloc.h
+ksw2_extd.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_extd2_sse.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_extf2_sse.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_extz.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_extz2_sse.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_gg.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_gg2.o: $(INCLUDE_DIR)/ksw2.h
+ksw2_gg2_sse.o: $(INCLUDE_DIR)/ksw2.h
+KSW2Aligner.o: $(INCLUDE_DIR)/ksw2.h $(INCLUDE_DIR)/KSW2Aligner.hpp
