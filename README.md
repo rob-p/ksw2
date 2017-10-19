@@ -1,4 +1,9 @@
-## Introduction
+## Introduction to the C++ wrapper
+
+This is a thin C++ wrapper around @lh3's KSW2 pairwise alignment library (the entire README of the KSW2 library itself is included below).  The purpose of this code is to expose the functionality of KSW2 via a simple C++ class `KSW2Aligner` that is intended to be used to align many pairs of sequences.  Thus, the `KSW2Aligner` class internally stores some state, which allows simplifying the interface for repeated calls to align pairs of sequences with the same parameters.  The class also attempts to automate the relevant memory management where applicable.  The focus of this thin wrapper is on ease-of-use and efficiency, and it should not introduce any substantial overhead beyond calling the `ksw2` functions themselves.  Currently, it is _opinionated_, and supports only those `ksw2` functions that are deemed to be most efficient (namely, `ksw2_gg2_sse` and `ksw2_extz2_sse`).  It does not yet support the variants of functions with dual-gap costs, but we will add this if there is desire for it.
+
+**The contents below are the original README of the KSW2 library**
+# Introduction
 
 KSW2 is a library to align a pair of biological sequences based on dynamic
 programming (DP). So far it comes with global alignment and alignment extension
