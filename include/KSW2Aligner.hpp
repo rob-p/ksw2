@@ -21,7 +21,8 @@ public:
 
 enum class KSW2AlignmentType : uint8_t { GLOBAL = 1, EXTENSION = 2 };
 
-// Just like Int2Type from https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Int-To-Type
+// Just like Int2Type from
+// https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Int-To-Type
 template <KSW2AlignmentType I> struct EnumToType {
   enum { value = static_cast<uint8_t>(I) };
 };
@@ -47,7 +48,15 @@ public:
 
   int operator()(const char* const queryOriginal, const int queryLength,
                  const char* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength,
                  ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::EXTENSION>);
 
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                  const uint8_t* const targetOriginal, const int targetLength,
@@ -55,7 +64,15 @@ public:
 
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                  const uint8_t* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
                  ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::EXTENSION>);
 
   KSW2Config& config() { return config_; }
   const ksw_extz_t& result() { return result_; }
