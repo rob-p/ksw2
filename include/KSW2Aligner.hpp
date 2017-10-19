@@ -34,6 +34,7 @@ struct KSW2Config {
   int bandwidth = -1;
   int dropoff = -1;
   int flag = 0;
+  int alphabetSize = 5;
   KSW2AlignmentType atype = KSW2AlignmentType::GLOBAL;
 };
 
@@ -51,6 +52,9 @@ public:
                  EnumToType<KSW2AlignmentType::GLOBAL>);
 
   int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength);
+
+  int operator()(const char* const queryOriginal, const int queryLength,
                  const char* const targetOriginal, const int targetLength,
                  ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
 
@@ -65,6 +69,9 @@ public:
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                  const uint8_t* const targetOriginal, const int targetLength,
                  EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength);
 
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                  const uint8_t* const targetOriginal, const int targetLength,

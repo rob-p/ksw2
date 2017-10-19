@@ -111,7 +111,8 @@ int KSW2Aligner::operator()(const char* const queryOriginal,
   int w = config_.bandwidth;
   int z = config_.dropoff;
   ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen,
-                target_.data(), 5, mat_.data(), q, e, w, z, config_.flag, ez);
+                target_.data(), config_.alphabetSize, mat_.data(), q, e, w, z,
+                config_.flag, ez);
   return ez->score;
 }
 
@@ -128,6 +129,26 @@ int KSW2Aligner::operator()(const char* const queryOriginal,
 int KSW2Aligner::operator()(const char* const queryOriginal,
                             const int queryLength,
                             const char* const targetOriginal,
+                            const int targetLength) {
+  int ret{0};
+  switch (config_.atype) {
+  case KSW2AlignmentType::EXTENSION:
+    ret = this->operator()(queryOriginal, queryLength, targetOriginal,
+                           targetLength, &result_,
+                           EnumToType<KSW2AlignmentType::EXTENSION>());
+    break;
+  case KSW2AlignmentType::GLOBAL:
+    ret = this->operator()(queryOriginal, queryLength, targetOriginal,
+                           targetLength, &result_,
+                           EnumToType<KSW2AlignmentType::GLOBAL>());
+    break;
+  }
+  return ret;
+}
+
+int KSW2Aligner::operator()(const char* const queryOriginal,
+                            const int queryLength,
+                            const char* const targetOriginal,
                             const int targetLength, ksw_extz_t* ez,
                             EnumToType<KSW2AlignmentType::GLOBAL>) {
   // auto ez = &result_;
@@ -139,12 +160,14 @@ int KSW2Aligner::operator()(const char* const queryOriginal,
   int q = config_.gapo;
   int e = config_.gape;
   int w = config_.bandwidth;
-  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY)
-                  ? ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen,
-                            target_.data(), 5, mat_.data(), q, e, w, 0, 0, 0)
-                  : ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(),
-                                tlen, target_.data(), 5, mat_.data(), q, e, w,
-                                &ez->m_cigar, &ez->n_cigar, &ez->cigar);
+  ez->score =
+      (config_.flag & KSW_EZ_SCORE_ONLY)
+          ? ksw_gg2(kalloc_allocator_.get(), qlen, query_.data(), tlen,
+                    target_.data(), config_.alphabetSize, mat_.data(), q, e, w,
+                    0, 0, 0)
+          : ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_.data(), tlen,
+                        target_.data(), config_.alphabetSize, mat_.data(), q, e,
+                        w, &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   return ez->score;
 }
 
@@ -167,12 +190,13 @@ int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
   int q = config_.gapo;
   int e = config_.gape;
   int w = config_.bandwidth;
-  ez->score = (config_.flag & KSW_EZ_SCORE_ONLY)
-                  ? ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen,
-                            target_, 5, mat_.data(), q, e, w, 0, 0, 0)
-                  : ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen,
-                                target_, 5, mat_.data(), q, e, w, &ez->m_cigar,
-                                &ez->n_cigar, &ez->cigar);
+  ez->score =
+      (config_.flag & KSW_EZ_SCORE_ONLY)
+          ? ksw_gg2(kalloc_allocator_.get(), qlen, query_, tlen, target_,
+                    config_.alphabetSize, mat_.data(), q, e, w, 0, 0, 0)
+          : ksw_gg2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_,
+                        config_.alphabetSize, mat_.data(), q, e, w,
+                        &ez->m_cigar, &ez->n_cigar, &ez->cigar);
   return ez->score;
 }
 
@@ -181,7 +205,24 @@ int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
                             const int targetLength,
                             EnumToType<KSW2AlignmentType::GLOBAL>) {
   return this->operator()(query_, queryLength, target_, targetLength, &result_,
-                          EnumToType <KSW2AlignmentType::GLOBAL>());
+                          EnumToType<KSW2AlignmentType::GLOBAL>());
+}
+
+int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
+                            const uint8_t* const target_,
+                            const int targetLength) {
+  int ret{0};
+  switch (config_.atype) {
+  case KSW2AlignmentType::EXTENSION:
+    ret = this->operator()(query_, queryLength, target_, targetLength, &result_,
+                           EnumToType<KSW2AlignmentType::EXTENSION>());
+    break;
+  case KSW2AlignmentType::GLOBAL:
+    ret = this->operator()(query_, queryLength, target_, targetLength, &result_,
+                           EnumToType<KSW2AlignmentType::GLOBAL>());
+    break;
+  }
+  return ret;
 }
 
 int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
@@ -194,8 +235,9 @@ int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
   int e = config_.gape;
   int w = config_.bandwidth;
   int z = config_.dropoff;
-  ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_, 5,
-                mat_.data(), q, e, w, z, config_.flag, ez);
+  ksw_extz2_sse(kalloc_allocator_.get(), qlen, query_, tlen, target_,
+                config_.alphabetSize, mat_.data(), q, e, w, z, config_.flag,
+                ez);
   return ez->score;
 }
 
@@ -204,7 +246,7 @@ int KSW2Aligner::operator()(const uint8_t* const query_, const int queryLength,
                             const int targetLength,
                             EnumToType<KSW2AlignmentType::EXTENSION>) {
   return this->operator()(query_, queryLength, target_, targetLength, &result_,
-                          EnumToType < KSW2AlignmentType::EXTENSION>());
+                          EnumToType<KSW2AlignmentType::EXTENSION>());
 }
 
 } // namespace ksw2pp
