@@ -106,7 +106,6 @@ public:
       kfree(kalloc_allocator_.get(), ez->cigar);
     }
   }
-  // const ksw_extz_t& result() { return result_; }
 
 private:
   std::vector<uint8_t> query_;
