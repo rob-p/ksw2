@@ -43,43 +43,61 @@ class KSW2Aligner {
 public:
   KSW2Aligner(int match = 2, int mismatch = -4);
 
+  /**
+   * Variants of the operator that require both an explicit type tag to
+   * determine the type of alignment to perform, as well as a pointer to
+   * an `ksw_extz_t` structure that will be used to hold the output.
+   */
   int operator()(const char* const queryOriginal, const int queryLength,
                  const char* const targetOriginal, const int targetLength,
                  ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>);
 
   int operator()(const char* const queryOriginal, const int queryLength,
                  const char* const targetOriginal, const int targetLength,
+                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  /**
+   * Variants of the operator that do not require an output
+   * `ksw_extz_t*` variable.  They will store the result in this object's
+   * `result_` variable, which can then be queried with the `result()` method.
+   */
+  int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength,
                  EnumToType<KSW2AlignmentType::GLOBAL>);
 
+  int operator()(const char* const queryOriginal, const int queryLength,
+                 const char* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::GLOBAL>);
+
+  int operator()(const uint8_t* const queryOriginal, const int queryLength,
+                 const uint8_t* const targetOriginal, const int targetLength,
+                 EnumToType<KSW2AlignmentType::EXTENSION>);
+
+  /**
+   * Variants of the operator that require neither an output
+   * `ksw_extz_t*` variable or an explicit type tag to select the type of
+   *alignment
+   * to perform.  These variants will perform whichever type of alignment is
+   * currently specified in the `atype` member of this class's `config_`
+   * object.
+   **/
   int operator()(const char* const queryOriginal, const int queryLength,
                  const char* const targetOriginal, const int targetLength);
 
-  int operator()(const char* const queryOriginal, const int queryLength,
-                 const char* const targetOriginal, const int targetLength,
-                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
-
-  int operator()(const char* const queryOriginal, const int queryLength,
-                 const char* const targetOriginal, const int targetLength,
-                 EnumToType<KSW2AlignmentType::EXTENSION>);
-
-  int operator()(const uint8_t* const queryOriginal, const int queryLength,
-                 const uint8_t* const targetOriginal, const int targetLength,
-                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::GLOBAL>);
-
-  int operator()(const uint8_t* const queryOriginal, const int queryLength,
-                 const uint8_t* const targetOriginal, const int targetLength,
-                 EnumToType<KSW2AlignmentType::GLOBAL>);
-
   int operator()(const uint8_t* const queryOriginal, const int queryLength,
                  const uint8_t* const targetOriginal, const int targetLength);
-
-  int operator()(const uint8_t* const queryOriginal, const int queryLength,
-                 const uint8_t* const targetOriginal, const int targetLength,
-                 ksw_extz_t* ez, EnumToType<KSW2AlignmentType::EXTENSION>);
-
-  int operator()(const uint8_t* const queryOriginal, const int queryLength,
-                 const uint8_t* const targetOriginal, const int targetLength,
-                 EnumToType<KSW2AlignmentType::EXTENSION>);
 
   KSW2Config& config() { return config_; }
   const ksw_extz_t& result() { return result_; }
