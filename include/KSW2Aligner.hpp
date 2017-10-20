@@ -41,7 +41,8 @@ struct KSW2Config {
 class KSW2Aligner {
 
 public:
-  KSW2Aligner(int match = 2, int mismatch = -4);
+  KSW2Aligner(int8_t match = 2, int8_t mismatch = -4);
+  KSW2Aligner(std::vector<int8_t> mat);
 
   /**
    * Variants of the operator that require both an explicit type tag to

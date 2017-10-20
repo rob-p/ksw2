@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 	}
 
 
-  KSW2Aligner aligner(a, b);
+  KSW2Aligner aligner(static_cast<int8_t>(a), static_cast<int8_t>(b));
   aligner.config() = config;
 
 #ifdef HAVE_KALLOC

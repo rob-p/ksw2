@@ -15,7 +15,7 @@ unsigned char seq_nt4_table_loc[256] = {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 
-KSW2Aligner::KSW2Aligner(int match, int mismatch) {
+KSW2Aligner::KSW2Aligner(int8_t match, int8_t mismatch) {
   query_.clear();
   target_.clear();
   kalloc_allocator_.reset(km_init());
@@ -35,6 +35,13 @@ KSW2Aligner::KSW2Aligner(int match, int mismatch) {
   }
   for (j = 0; j < m; ++j)
     mat_[(m - 1) * m + j] = 0;
+}
+
+KSW2Aligner::KSW2Aligner(std::vector<int8_t> mat) {
+  query_.clear();
+  target_.clear();
+  kalloc_allocator_.reset(km_init());
+  mat_ = mat;
 }
 
 /**
