@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
 	int8_t mat[25];
 	ksw_extz_t ez;
 	gzFile fp[2];
+	bool delalgo{false};
   KSW2Config config;
   config.gapo = q;
   config.gape = e;
@@ -188,6 +189,7 @@ int main(int argc, char *argv[])
 		}
 	}
   if (algo == nullptr) {
+	  delalgo = true;
     std::string algos = "extd";
     algo = new char[algos.length()+1];
     strcpy(algo, algos.c_str());
@@ -249,6 +251,8 @@ int main(int argc, char *argv[])
 #ifdef HAVE_KALLOC
 	km_destroy(km);
 #endif
+	if (delalgo) {
   delete [] algo;
+	}
 	return 0;
 }
